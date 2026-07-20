@@ -7,6 +7,8 @@ dist-ssr
 .DS_Store
 *.log
 .vercel
+.tools/
+развитие/
 supabase/.temp
 supabase/.branches
 *.tsbuildinfo
