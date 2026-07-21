@@ -16,6 +16,10 @@ export type StudentProfile = {
   studyPace: string;
   admissionYear: string;
   grades: string;
+  ieltsScore: string;
+  satScore: string;
+  resumePath: string;
+  resumeName: string;
   englishLevel: string;
   languageReadiness: string;
   budget: string;
@@ -83,6 +87,6 @@ export default function App() {
   if (!profileLoaded) return <main className="auth-loading">Загружаем твой план…</main>;
 
   return profile
-    ? <Dashboard profile={profile} onRestart={() => setProfile(null)} onSignOut={signOut} />
+    ? <Dashboard profile={profile} onProfileChange={setProfile} onRestart={() => setProfile(null)} onSignOut={signOut} />
     : <Onboarding onComplete={finishOnboarding} />;
 }

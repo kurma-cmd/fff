@@ -11,7 +11,7 @@ import { Logo } from './Onboarding';
 import { StreakBadge } from './StreakBadge';
 import { recordDailyActivity } from '../lib/learningProgress';
 
-type Props = { profile: StudentProfile; onRestart: () => void; onSignOut: () => void };
+type Props = { profile: StudentProfile; onProfileChange: (profile: StudentProfile) => void; onRestart: () => void; onSignOut: () => void };
 export type PageName = 'path' | 'universities' | 'admission' | 'language' | 'stories' | 'reading' | 'tests';
 const pagePaths: Record<PageName, string> = {
   path: '/path', universities: '/universities', admission: '/admission',
@@ -27,7 +27,7 @@ const menu: { id: PageName; label: string }[] = [
   { id: 'admission', label: 'Поступление' }, { id: 'language', label: 'Язык' }, { id: 'stories', label: 'Истории' }, { id: 'reading', label: 'Тексты' },
 ];
 
-export function Dashboard({ profile, onRestart, onSignOut }: Props) {
+export function Dashboard({ profile, onProfileChange, onRestart, onSignOut }: Props) {
   const [page, setPage] = useState<PageName>(pageFromPath);
   const [languageCourse, setLanguageCourse] = useState<string>();
   const [streak, setStreak] = useState(0);
@@ -46,7 +46,7 @@ export function Dashboard({ profile, onRestart, onSignOut }: Props) {
   return <main><header className="app-header"><button className="logo-button" onClick={() => navigate('path')}><Logo /></button><nav>{menu.map(item => <button className={page === item.id ? 'nav-active' : ''} key={item.id} onClick={() => navigate(item.id)}>{item.label}</button>)}</nav><div className="header-profile"><StreakBadge days={streak} /><button className="avatar" onClick={onRestart}>{profile.nickname.slice(0, 1).toUpperCase()}</button><button className="logout-button" onClick={onSignOut}>Выйти</button></div></header>
     {page === 'path' && <OverviewPage profile={profile} goTo={navigate} />}
     {page === 'universities' && <UniversitiesPage profile={profile} onStudyLanguage={studyLanguage} />}
-    {page === 'admission' && <AdmissionPage onOpenCatalog={() => navigate('universities')} />}
+    {page === 'admission' && <AdmissionPage profile={profile} onProfileChange={onProfileChange} onOpenCatalog={() => navigate('universities')} />}
     {page === 'language' && <LanguagePage profile={profile} initialCourse={languageCourse} onNavigate={navigate} />}
     {page === 'stories' && <StoriesPage />}
     {page === 'reading' && <ReadingPage />}
