@@ -59,9 +59,9 @@ export function Translator() {
   return <section className="panel translator">
     <div className="section-title"><div><p className="eyebrow">Быстрый помощник</p><h2>Переводчик</h2></div></div>
     <div className="translator-languages">
-      <QadamSelect value={fromId} onChange={setFromId} ariaLabel="Исходный язык" options={languageCourses.map(language => ({ value: language.id, label: `${language.flag} ${language.name}` }))} />
+      <QadamSelect value={fromId} onChange={setFromId} ariaLabel="Исходный язык" options={languageCourses.map(language => ({ value: language.id, label: language.name, icon: language.flag }))} />
       <button type="button" onClick={swapLanguages} aria-label="Поменять языки местами">⇄</button>
-      <QadamSelect value={toId} onChange={setToId} ariaLabel="Язык перевода" options={languageCourses.map(language => ({ value: language.id, label: `${language.flag} ${language.name}` }))} />
+      <QadamSelect value={toId} onChange={setToId} ariaLabel="Язык перевода" options={languageCourses.map(language => ({ value: language.id, label: language.name, icon: language.flag }))} />
     </div>
     <form className="translator-form" onSubmit={translate}>
       <textarea value={source} onChange={event => setSource(event.target.value)} placeholder="Напиши слово, предложение или небольшой текст" maxLength={1500} required />

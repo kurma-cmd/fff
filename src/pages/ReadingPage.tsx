@@ -32,14 +32,17 @@ export function ReadingPage() {
   async function generateText(selectedLanguage = language) {
     setBusy(true); setMessage(''); setAnswers({}); setSaved(false);
     const topic = topics[Math.floor(Math.random() * topics.length)];
-    const prompt = `Create an engaging reading text in ${selectedLanguage} for a teenager at B1-B2 level about ${topic}. It must contain 650-850 words divided into 6-8 substantial paragraphs. Do not use Maya or a library. After it, create exactly 5 comprehension questions: main idea, important detail, cause and effect, word meaning from context, and conclusion. Each question needs 3 plausible options. Return only JSON: {"title":"...","level":"B1-B2 · 8-10 min","paragraphs":["..."],"questions":[{"question":"...","options":["...","...","..."],"answer":"exact option"}]}. Everything inside JSON must be in ${selectedLanguage}.`;
+    const prompt = `Create an engaging reading text in ${selectedLanguage} for a teenager at B1-B2 level about ${topic}. Write 850-1000 words divided into 7-9 substantial paragraphs; never return a shortened summary. Do not use Maya or a library. After it, create exactly 5 comprehension questions: main idea, important detail, cause and effect, word meaning from context, and conclusion. Each question needs 3 plausible options. Return only JSON: {"title":"...","level":"B1-B2 · 10-12 min","paragraphs":["..."],"questions":[{"question":"...","options":["...","...","..."],"answer":"exact option"}]}. Everything inside JSON must be in ${selectedLanguage}.`;
     const { data, error } = await supabase.functions.invoke('ai', { body: { prompt, system: 'You create accurate, age-appropriate educational reading materials. Return valid JSON only.' } });
     const generated = !error && typeof data?.text === 'string' ? parseText(data.text) : undefined;
     if (generated) setText(generated);
     else {
-      const fallback = readingTexts.find(item => item.language === selectedLanguage) ?? readingTexts[0];
+      const availableFallbacks = readingTexts.filter(item => item.language === selectedLanguage && item.title !== text?.title);
+      const fallback = availableFallbacks[Math.floor(Math.random() * availableFallbacks.length)]
+        ?? readingTexts.find(item => item.language === selectedLanguage)
+        ?? readingTexts[0];
       setText({ title: fallback.title, level: fallback.level, paragraphs: fallback.paragraphs, questions: [{ question: fallback.question, options: fallback.options, answer: fallback.answer }] });
-      setMessage('Новый текст не загрузился — показан запасной. Нажми «Другой текст», чтобы попробовать снова.');
+      setMessage('AI сейчас недоступен — показан другой текст из библиотеки.');
     }
     setBusy(false);
   }
