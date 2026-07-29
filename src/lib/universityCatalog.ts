@@ -3,13 +3,14 @@ import { catalogEurope } from './catalogEurope';
 import { catalogWorld } from './catalogWorld';
 import { catalogMore } from './catalogMore';
 import { catalogStrongExpansion } from './catalogStrongExpansion';
+import { catalogGlobalExpansion } from './catalogGlobalExpansion';
 import type { University, UniversitySeed } from './universities';
 
 const groups: Record<string, UniversitySeed[]> = { ...catalogEurope, ...catalogAsia, ...catalogWorld };
 
 export const universityCatalog: University[] = Object.entries(groups).flatMap(([country, universities]) =>
   universities.map(university => ({ ...university, country })),
-).concat(catalogMore, catalogStrongExpansion);
+).concat(catalogMore, catalogStrongExpansion, catalogGlobalExpansion);
 
 const englishRanks: Record<string, number> = {
   A1: 1, A2: 2, B1: 3, B2: 4, C1: 5, C2: 6,
