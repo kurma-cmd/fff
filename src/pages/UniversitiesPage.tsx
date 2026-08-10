@@ -6,12 +6,13 @@ import { getEnglishMatch, getProfileMatch, universityCatalog } from '../lib/univ
 import { loadSavedUniversities, setUniversitySaved } from '../lib/userData';
 import { useEffect } from 'react';
 import { UniversityComparison } from '../components/UniversityComparison';
+import { getUniversityTier } from '../lib/universityTiers';
 
 type Props = { profile: StudentProfile; onStudyLanguage: (courseId: string) => void };
 
 export function UniversitiesPage({ profile, onStudyLanguage }: Props) {
   const [activeCountry, setActiveCountry] = useState(profile.countries[0]);
-  const [filters, setFilters] = useState<UniversityFilterState>({ direction: 'Все', cost: 'Любая', fundingOnly: false, suitableEnglishOnly: false });
+  const [filters, setFilters] = useState<UniversityFilterState>({ direction: 'Все', cost: 'Любая', fundingOnly: false, suitableEnglishOnly: false, tier: 'all' });
   const [saved, setSaved] = useState<Set<string>>(new Set());
   useEffect(() => { void loadSavedUniversities().then(setSaved); }, []);
   const toggleSaved = async (name: string) => { const next = !saved.has(name); if (await setUniversitySaved(name, next)) setSaved(current => { const value = new Set(current); next ? value.add(name) : value.delete(name); return value; }); };
@@ -19,13 +20,14 @@ export function UniversitiesPage({ profile, onStudyLanguage }: Props) {
     .filter(university => university.country === activeCountry)
     .filter(university => filters.direction === 'Все' || university.directions.includes(filters.direction))
     .filter(university => filters.cost === 'Любая' || university.cost === filters.cost)
+    .filter(university => filters.tier === 'all' || getUniversityTier(university) === filters.tier)
     .filter(university => !filters.fundingOnly || university.funding)
     .filter(university => !filters.suitableEnglishOnly || getEnglishMatch(profile.englishLevel, university).score === 3)
     .sort((a, b) => getProfileMatch(profile, b).score - getProfileMatch(profile, a).score),
   [activeCountry, filters, profile]);
 
   return <div className="page-shell">
-    <header className="page-hero"><p className="eyebrow">База университетов</p><h1>Сначала выбери страну</h1><p>Выше покажем варианты, которые ближе к твоему направлению, баллу, бюджету, языку и приоритетам.</p></header>
+    <header className="page-hero"><p className="eyebrow">Персональный каталог для {profile.nickname}</p><h1>Вузы по уровню и твоему профилю</h1><p>Qadam пересчитывает порядок по направлению «{profile.direction}», английскому {profile.englishLevel}, бюджету и твоим приоритетам.</p></header>
     <div className="country-picker">{profile.countries.map(country => {
       const count = universityCatalog.filter(university => university.country === country).length;
       return <button className={country === activeCountry ? 'active' : ''} onClick={() => setActiveCountry(country)} key={country}>{country}<small>{count} вузов</small></button>;
