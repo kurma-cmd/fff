@@ -5,6 +5,7 @@ import { Onboarding } from './components/Onboarding';
 import { supabase } from './lib/supabase';
 import { LandingPage } from './pages/LandingPage';
 import { loadProfile, saveProfile } from './lib/userData';
+import { subscribeToDataChanges } from './lib/realtimeSync';
 
 export type StudentProfile = {
   nickname: string;
@@ -36,6 +37,7 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [dataVersion, setDataVersion] = useState(0);
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
@@ -62,6 +64,23 @@ export default function App() {
 
   useEffect(() => { if (screen === 'app' && isAuthenticated) void loadProfile().then(value => { setProfile(value); setProfileLoaded(true); }); }, [isAuthenticated, screen]);
 
+  useEffect(() => {
+    if (screen !== 'app' || !isAuthenticated) return;
+    const refresh = () => {
+      void loadProfile().then(value => setProfile(value));
+      setDataVersion(version => version + 1);
+    };
+    const unsubscribe = subscribeToDataChanges(refresh);
+    const refreshWhenVisible = () => { if (document.visibilityState === 'visible') refresh(); };
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+    return () => {
+      unsubscribe();
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
+    };
+  }, [isAuthenticated, screen]);
+
   async function finishOnboarding(value: StudentProfile) { if (await saveProfile(value)) setProfile(value); }
   async function signOut() { await supabase.auth.signOut(); setProfile(null); setProfileLoaded(false); setScreen('landing'); }
 
@@ -87,6 +106,6 @@ export default function App() {
   if (!profileLoaded) return <main className="auth-loading">Загружаем твой план…</main>;
 
   return profile
-    ? <Dashboard profile={profile} onProfileChange={setProfile} onRestart={() => setProfile(null)} onSignOut={signOut} />
+    ? <Dashboard profile={profile} dataVersion={dataVersion} onProfileChange={setProfile} onRestart={() => setProfile(null)} onSignOut={signOut} />
     : <Onboarding onComplete={finishOnboarding} />;
 }

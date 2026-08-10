@@ -11,7 +11,7 @@ import { Logo } from './Onboarding';
 import { StreakBadge } from './StreakBadge';
 import { recordDailyActivity } from '../lib/learningProgress';
 
-type Props = { profile: StudentProfile; onProfileChange: (profile: StudentProfile) => void; onRestart: () => void; onSignOut: () => void };
+type Props = { profile: StudentProfile; dataVersion: number; onProfileChange: (profile: StudentProfile) => void; onRestart: () => void; onSignOut: () => void };
 export type PageName = 'path' | 'universities' | 'admission' | 'language' | 'stories' | 'reading' | 'tests';
 const pagePaths: Record<PageName, string> = {
   path: '/path', universities: '/universities', admission: '/admission',
@@ -30,7 +30,7 @@ const learningMenu: { id: PageName; label: string }[] = [
   { id: 'language', label: 'Язык' }, { id: 'stories', label: 'Истории' }, { id: 'reading', label: 'Тексты' },
 ];
 
-export function Dashboard({ profile, onProfileChange, onRestart, onSignOut }: Props) {
+export function Dashboard({ profile, dataVersion, onProfileChange, onRestart, onSignOut }: Props) {
   const [page, setPage] = useState<PageName>(pageFromPath);
   const [openMenu, setOpenMenu] = useState<'admission' | 'learning' | null>(null);
   const [languageCourse, setLanguageCourse] = useState<string>();
@@ -54,12 +54,12 @@ export function Dashboard({ profile, onProfileChange, onRestart, onSignOut }: Pr
     <div className={`nav-direction ${openMenu === 'admission' ? 'open' : ''}`}><button className={isAdmission ? 'direction-active' : ''} onClick={() => setOpenMenu(current => current === 'admission' ? null : 'admission')}>Поступление <i /></button>{openMenu === 'admission' && <div className="nav-submenu">{menuItems(admissionMenu)}</div>}</div>
     <div className={`nav-direction ${openMenu === 'learning' ? 'open' : ''}`}><button className={!isAdmission ? 'direction-active' : ''} onClick={() => setOpenMenu(current => current === 'learning' ? null : 'learning')}>Обучение <i /></button>{openMenu === 'learning' && <div className="nav-submenu">{menuItems(learningMenu)}</div>}</div>
   </nav><div className="header-profile"><StreakBadge days={streak} /><button className="avatar" onClick={onRestart}>{profile.nickname.slice(0, 1).toUpperCase()}</button><button className="logout-button" onClick={onSignOut}>Выйти</button></div></header>
-    {page === 'path' && <OverviewPage profile={profile} goTo={navigate} />}
-    {page === 'universities' && <UniversitiesPage profile={profile} onStudyLanguage={studyLanguage} />}
-    {page === 'admission' && <AdmissionPage profile={profile} onProfileChange={onProfileChange} onOpenCatalog={() => navigate('universities')} />}
-    {page === 'language' && <LanguagePage profile={profile} initialCourse={languageCourse} onNavigate={navigate} />}
-    {page === 'stories' && <StoriesPage />}
-    {page === 'reading' && <ReadingPage />}
-    {page === 'tests' && <TestsPage />}
+    {page === 'path' && <OverviewPage key={dataVersion} profile={profile} goTo={navigate} />}
+    {page === 'universities' && <UniversitiesPage key={dataVersion} profile={profile} onStudyLanguage={studyLanguage} />}
+    {page === 'admission' && <AdmissionPage key={dataVersion} profile={profile} onProfileChange={onProfileChange} onOpenCatalog={() => navigate('universities')} />}
+    {page === 'language' && <LanguagePage key={dataVersion} profile={profile} initialCourse={languageCourse} onNavigate={navigate} />}
+    {page === 'stories' && <StoriesPage key={dataVersion} />}
+    {page === 'reading' && <ReadingPage key={dataVersion} />}
+    {page === 'tests' && <TestsPage key={dataVersion} />}
   </main>;
 }
