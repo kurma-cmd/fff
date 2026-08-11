@@ -8,12 +8,16 @@ const directions = ['IT и технологии', 'Бизнес', 'Медици�
 const countries = ['Казахстан', 'США', 'Германия', 'Южная Корея', 'Великобритания', 'Канада', 'Франция', 'Италия', 'Нидерланды', 'Турция', 'Япония', 'Чехия', 'Китай', 'Сингапур', 'Малайзия', 'ОАЭ', 'Катар', 'Саудовская Аравия', 'Индия', 'Таиланд', 'Индонезия', 'Вьетнам'];
 const priorities = ['Полный грант', 'Сильная программа', 'Безопасная страна', 'Недорогое жильё', 'Обучение на английском', 'Работа после учёбы'];
 const selectOptions = (items: string[]) => items.map(value => ({ value, label: value }));
-const levelFromIelts = (score: number) => score >= 7 ? 'C1' : score >= 5.5 ? 'B2' : score >= 4 ? 'B1' : score > 0 ? 'A2' : 'A1';
+const levelFromIelts = (score: string) => {
+  if (!score) return 'Не определён';
+  const value = Number(score);
+  return value >= 7 ? 'C1' : value >= 5.5 ? 'B2' : value >= 4 ? 'B1' : 'A2';
+};
 
 const initialProfile: StudentProfile = {
   nickname: '', grade: '9 класс', direction: directions[0], country: countries[0], countries: [countries[0]],
   goal: 'Поступить на грант', admissionYear: 'Через 2 года', studyPace: '20 минут в день', grades: '4.0',
-  ieltsScore: '', satScore: '', resumePath: '', resumeName: '', englishLevel: 'A1', languageReadiness: 'Готов учить с нуля', budget: 'Только полный грант', priorities: ['Полный грант'],
+  ieltsScore: '', satScore: '', resumePath: '', resumeName: '', englishLevel: 'Не определён', languageReadiness: 'Готов учить с нуля', budget: 'Только полный грант', priorities: ['Полный грант'],
 };
 
 export function Onboarding({ onComplete }: Props) {
@@ -30,7 +34,7 @@ export function Onboarding({ onComplete }: Props) {
   const sat = Number(profile.satScore);
   const isValid = profile.nickname.trim().length >= 2 && profile.countries.length > 0 && Number(profile.grades) >= 2 && Number(profile.grades) <= 5
     && (profile.ieltsScore === '' || (ielts >= 0 && ielts <= 9)) && (profile.satScore === '' || sat === 0 || (sat >= 400 && sat <= 1600));
-  const finish = () => onComplete({ ...profile, englishLevel: levelFromIelts(ielts), goal: profile.priorities[0] ?? 'Поступить в университет' });
+  const finish = () => onComplete({ ...profile, englishLevel: levelFromIelts(profile.ieltsScore), goal: profile.priorities[0] ?? 'Поступить в университет' });
   const addResume = async (file?: File) => {
     if (!file) return;
     setIsUploading(true);

@@ -17,6 +17,7 @@ const englishRanks: Record<string, number> = {
 };
 
 export function getEnglishMatch(level: string, university: University) {
+  if (!(level in englishRanks)) return { label: 'Английский: уровень не определён', score: 0 };
   const current = englishRanks[level] ?? 1;
   const required = englishRanks[university.englishBand];
   if (current >= required) return { label: 'Английский: подходит', score: 3 };

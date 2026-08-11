@@ -57,7 +57,7 @@ export function Dashboard({ profile, dataVersion, onProfileChange, onRestart, on
     {page === 'path' && <OverviewPage key={dataVersion} profile={profile} goTo={navigate} />}
     {page === 'universities' && <UniversitiesPage key={dataVersion} profile={profile} onStudyLanguage={studyLanguage} />}
     {page === 'admission' && <AdmissionPage key={dataVersion} profile={profile} onProfileChange={onProfileChange} onOpenCatalog={() => navigate('universities')} />}
-    {page === 'language' && <LanguagePage key={dataVersion} profile={profile} initialCourse={languageCourse} onNavigate={navigate} />}
+    {page === 'language' && <LanguagePage key={dataVersion} profile={profile} initialCourse={languageCourse} onNavigate={navigate} onProfileChange={onProfileChange} />}
     {page === 'stories' && <StoriesPage key={dataVersion} />}
     {page === 'reading' && <ReadingPage key={dataVersion} />}
     {page === 'tests' && <TestsPage key={dataVersion} />}

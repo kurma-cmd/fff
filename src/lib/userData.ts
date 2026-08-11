@@ -3,7 +3,12 @@ import { supabase } from './supabase';
 
 const isProfile = (value: unknown): value is StudentProfile => Boolean(value && typeof value === 'object' && 'nickname' in value && 'countries' in value);
 
-export async function loadProfile() { const { data } = await supabase.from('student_profiles').select('profile').maybeSingle(); return isProfile(data?.profile) ? data.profile : null; }
+export async function loadProfile() {
+  const { data } = await supabase.from('student_profiles').select('profile').maybeSingle();
+  if (!isProfile(data?.profile)) return null;
+  if (!data.profile.ieltsScore && data.profile.englishLevel === 'A1') return { ...data.profile, englishLevel: 'Не определён' };
+  return data.profile;
+}
 export async function saveProfile(profile: StudentProfile) { const { data: auth } = await supabase.auth.getUser(); if (!auth.user) return false; const { error } = await supabase.from('student_profiles').upsert({ user_id: auth.user.id, profile, updated_at: new Date().toISOString() }); return !error; }
 export async function loadStats() { const { data } = await supabase.from('learning_stats').select('xp').maybeSingle(); return data?.xp ?? 0; }
 export async function addXp(amount: number) { const { data: auth } = await supabase.auth.getUser(); if (!auth.user) return 0; const current = await loadStats(); const xp = current + amount; await supabase.from('learning_stats').upsert({ user_id: auth.user.id, xp, updated_at: new Date().toISOString() }); return xp; }
