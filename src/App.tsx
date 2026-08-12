@@ -82,6 +82,11 @@ export default function App() {
   }, [isAuthenticated, screen]);
 
   async function finishOnboarding(value: StudentProfile) { if (await saveProfile(value)) setProfile(value); }
+  async function refreshAllData() {
+    const value = await loadProfile();
+    setProfile(value);
+    setDataVersion(version => version + 1);
+  }
   async function signOut() { await supabase.auth.signOut(); setProfile(null); setProfileLoaded(false); setScreen('landing'); }
 
   if (screen === 'landing') {
@@ -106,6 +111,6 @@ export default function App() {
   if (!profileLoaded) return <main className="auth-loading">Загружаем твой план…</main>;
 
   return profile
-    ? <Dashboard profile={profile} dataVersion={dataVersion} onProfileChange={setProfile} onRestart={() => setProfile(null)} onSignOut={signOut} />
+    ? <Dashboard profile={profile} dataVersion={dataVersion} onRefresh={refreshAllData} onProfileChange={setProfile} onRestart={() => setProfile(null)} onSignOut={signOut} />
     : <Onboarding onComplete={finishOnboarding} />;
 }
